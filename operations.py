@@ -1,5 +1,8 @@
 import cv2
 import numpy as np
+
+# A FILE CONTAINING SOME POPULAR MORPHOLOGICAL OPERATIONS
+
 def opening(img):
     # define the kernel
     kernel = np.ones((3, 3), np.uint8)
