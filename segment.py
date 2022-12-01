@@ -1,23 +1,43 @@
 import cv2
 import numpy as np
+import matplotlib as plt
+
+def image_processing(image):
+    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    # BINARISE THE IMAGE
+    ret, thresh = cv2.threshold(gray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    cv2.imshow("thresh", thresh)
+
+    # DENOISING THRESH
+    img1 = cv2.fastNlMeansDenoising(thresh, None, 30.0, 7, 10)
+    cv2.imshow("denoised", img1)
+
+    # CANNY EDGE
+    edges = cv2.Canny(img1,100,200)
+    cv2.imshow("Canny", edges)
+    # Finding Contours
+    # Use a copy of the image e.g. edged.copy()
+    # since findContours alters the image
+    contours, hierarchy = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    cv2.imshow('Canny Edges After Contouring', edges)
+    # cv2.waitKey(0)
+    print("Number of Contours found = " + str(len(contours)))
+    # Draw all contours
+    # -1 signifies drawing all contours
+    cv2.drawContours(image, contours, -1, (0, 255, 0), 3)
+    cv2.imshow('Contours', image)
+    # cv2.waitKey()
+    # cv2.destroyAllWindows()
 
 # Load in image, convert to gray scale, and Otsu's threshold
+# def edge_detection(img):
 img = cv2.imread("/home/mayank/Downloads/WhatsApp Image 2022-11-18 at 11.16.00 PM (1).jpeg")
-gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-ret, thresh = cv2.threshold(gray,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-cv2.imshow("thresh", thresh)
-kernel = np.ones((3,3),np.uint8)
-closing = cv2.morphologyEx(thresh,cv2.MORPH_CLOSE, kernel, iterations = 1)
-dist = cv2.distanceTransform(closing, cv2.DIST_L2, 3)
-ret, dist1 = cv2.threshold(dist, 0.6*dist.max(), 255, 0)
-cv2.imshow("dist1", dist1)
-markers = np.zeros(dist.shape, dtype=np.int32)
-dist_8u = dist1.astype('uint8')
-contours, _ = cv2.findContours(dist_8u, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-for i in range(len(contours)):
-    cv2.drawContours(markers, contours, i, (i+1), -1)
-markers = cv2.circle(markers, (15,15), 5, len(contours)+1, -1)
-markers = cv2.watershed(img, markers)
-img[markers == -1] = [0,0,255]
-cv2.imshow("Image", img)
-cv2.waitKey(0)
+image_processing(img)
+
+while(1):
+    # cv2.imshow('img',img)
+    k = cv2.waitKey(33)
+    if k==27:    # Esc key to stop
+        break
+    elif k==-1:  # normally -1 returned,so don't print it
+        continue
